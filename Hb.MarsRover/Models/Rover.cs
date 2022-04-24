@@ -25,13 +25,15 @@ namespace Hb.MarsRover.Models
             RoverStateValidator roverStateValidator = new RoverStateValidator(plateau);
             var commandState = command.ExecuteCommand(_state);
 
-            var validationResult = roverStateValidator.Validate(_state);
+            var validationResult = roverStateValidator.Validate(commandState);
 
             if (!validationResult.IsValid)
             {
-                throw new CommandOutOfBoundsException($"An error occuured while executing command \"{command.CommandName}\". Unable to move to location {commandState.PrintState} from {_state.PrintState} because its out of plateu bounds");
+                throw new CommandOutOfBoundsException($"@An error occuured while executing command \"{command.CommandName}\". " +
+                    $"Unable to move to location {commandState.PrintState()} from {_state.PrintState()} because its out of plateu bounds");
             }
 
+            // if command is valid then set current roverstate
             _state = commandState;
             return _state;
         }

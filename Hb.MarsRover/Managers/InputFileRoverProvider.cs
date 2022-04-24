@@ -40,7 +40,7 @@ namespace Hb.MarsRover.Managers
             List<Rover> rovers = new List<Rover>();
             foreach (var group in roverLineGroups)
             {
-                rovers.Add(ParseRovoerGroup(group));
+                rovers.Add(ParseRoverGroup(group));
             }
 
             RoverProviderResult result = new RoverProviderResult();
@@ -52,14 +52,14 @@ namespace Hb.MarsRover.Managers
 
         private Plateau ParsePlateauLine(string line)
         {
-            int x = 0;
-            int y = 0;
+
 
             var splitResult = line.Trim().Split(' ');
 
             if (splitResult.Length != 2)
                 throw new InputFileValidationException("Incorrect plateu input.");
 
+            int x, y;
             if (!int.TryParse(splitResult[0], out x) || !int.TryParse(splitResult[1], out y))
             {
                 throw new InputFileValidationException("An error occurred while parsing plateu input. Coordinates must be integer");
@@ -72,7 +72,7 @@ namespace Hb.MarsRover.Managers
             };
         }
 
-        private Rover ParseRovoerGroup(string[] group)
+        private Rover ParseRoverGroup(string[] group)
         {
             var coordLine = group[0];
             var commandLine = group[1];
@@ -87,8 +87,15 @@ namespace Hb.MarsRover.Managers
         {
             var splitResult = line.Trim().Split(' ');
             RoverState roverState = new RoverState();
-            roverState.X = int.Parse(splitResult[0]);
-            roverState.Y = int.Parse(splitResult[1]);
+            int x, y;
+
+            if (!int.TryParse(splitResult[0], out x) || !int.TryParse(splitResult[1], out y))
+            {
+                throw new InputFileValidationException("An error occurred while parsing rover input. Coordinates must be integer");
+            }
+
+            roverState.X = x;
+            roverState.Y = y;
 
 
             Direction direction = Direction.Unknown;
@@ -106,13 +113,13 @@ namespace Hb.MarsRover.Managers
             List<IRoverCommand> commands = new List<IRoverCommand>();
             var commandInterfaceType = typeof(IRoverCommand);
 
-            // Get class types which imlements IRoverCommand and group them by CommandName
+            // Get class types which imlements IRoverCommand and them convert them to dictionary by CommandName
             var commandTypes = AppDomain.CurrentDomain.GetAssemblies()
                                 .SelectMany(s => s.GetTypes())
                                 .Where(p => commandInterfaceType.IsAssignableFrom(p) && !p.IsInterface)
                                 .ToDictionary(x => x.GetProperty("CommandName").GetValue(Activator.CreateInstance(x), null));
 
-            // enumarete each character in command line and create command classes 
+            // Enumarete each character in command line and create command classes 
             foreach (var command in line.Trim())
             {
                 if (commandTypes.ContainsKey(command.ToString()))
@@ -121,7 +128,7 @@ namespace Hb.MarsRover.Managers
                 }
                 else
                 {
-                    throw new InputFileValidationException($"Unkonwn command at line {line}");
+                    throw new InputFileValidationException($"Unkonwn command \"{command}\" at line {line}");
                 }
             }
 

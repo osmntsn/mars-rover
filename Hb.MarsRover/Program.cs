@@ -11,23 +11,30 @@ namespace Hb.MarsRover
         static void Main(string[] args)
         {
             //Read rover configurations from "input.txt"
-            IRoverProvider inputFileRoverManager = new InputFileRoverProvider();
-            var roverProviderResult = inputFileRoverManager.GetRovers();
-
-            //Execute rover commands
-            foreach (var rover in roverProviderResult.Rovers)
+            try
             {
-                foreach (var command in rover.GetRoverCommands())
+                IRoverProvider inputFileRoverManager = new InputFileRoverProvider();
+                var roverProviderResult = inputFileRoverManager.GetRovers();
+
+                //Execute rover commands
+                foreach (var rover in roverProviderResult.Rovers)
                 {
-                    rover.ExecuteCommand(command, roverProviderResult.Plateau);
+                    foreach (var command in rover.GetRoverCommands())
+                    {
+                        rover.ExecuteCommand(command, roverProviderResult.Plateau);
+                    }
+
+                    Console.WriteLine(rover.GetState().PrintState());
                 }
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.StackTrace);
             }
 
-            //Print last rover states
-            foreach (var rover in roverProviderResult.Rovers)
-            {
-                Console.WriteLine(rover.GetState().PrintState());
-            }
+            Console.ReadLine();
         }
     }
 }
